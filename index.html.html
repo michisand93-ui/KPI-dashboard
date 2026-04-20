@@ -181,31 +181,22 @@ function initProj(id){
 const JSONBIN_KEY='$2a$10$KXYahc/Juvxnf9DJSWZ5VOJd75Q47BCsKtGYUD9AkdxKoQYwJjVkS';
 const JSONBIN_MASTER='$2a$10$Pn856Ab1qmLXU8O8CttceOnBdRLtckzXNS4YgfOZjnfGAa.V5FN8a';
 const JSONBIN_URL='https://api.jsonbin.io/v3/bins';
-let BIN_ID=null;
+let BIN_ID='69e65787aaba8821971c4af9';
 
 async function loadAll(){
   setStatus('Caricamento dati...','');
-  // BIN_ID fisso — creato una volta sola, poi hardcoded
-  const FIXED_BIN=localStorage.getItem('kpi-bin-id');
-  if(FIXED_BIN) BIN_ID=FIXED_BIN;
-
-  if(BIN_ID){
-    try {
-      const r=await fetch(`https://api.jsonbin.io/v3/bins/${BIN_ID}/latest`,{headers:{'X-Access-Key':JSONBIN_KEY,'X-Bin-Meta':'false'}});
-      if(!r.ok) throw new Error('fetch failed');
-      const saved=await r.json();
-      if(saved.projects) projects=saved.projects;
-      if(saved.ls) ls=saved.ls;
-      if(saved.lag) lag=saved.lag;
-      if(saved.lLabels) lLabels=saved.lLabels;
-      projects.forEach(p=>initProj(p.id));
-      setStatus('Dati aggiornati ✓','ok');
-    } catch(e){
-      setStatus('Errore caricamento — mostro ultimi dati locali','err');
-    }
-  } else {
-    // primo avvio: crea il bin subito con stato default
-    await saveAll(false,true);
+  try {
+    const r=await fetch(`https://api.jsonbin.io/v3/bins/${BIN_ID}/latest`,{headers:{'X-Master-Key':JSONBIN_MASTER,'X-Bin-Meta':'false'}});
+    if(!r.ok) throw new Error('fetch failed');
+    const saved=await r.json();
+    if(saved.projects) projects=saved.projects;
+    if(saved.ls) ls=saved.ls;
+    if(saved.lag) lag=saved.lag;
+    if(saved.lLabels) lLabels=saved.lLabels;
+    projects.forEach(p=>initProj(p.id));
+    setStatus('Dati aggiornati ✓','ok');
+  } catch(e){
+    setStatus('Errore caricamento','err');
   }
   document.getElementById('app-body').style.opacity='1';
   renderAll();
